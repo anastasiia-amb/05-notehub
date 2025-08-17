@@ -2,13 +2,35 @@ import css from "./NoteForm.module.css";
 import { createNote } from "../../services/noteService";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CreateNoteParams } from "../../services/noteService";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, Field, ErrorMessage, type FormikHelpers } from "formik";
 import * as Yup from "yup";
-import type { Note } from "../../types/note";
 
 interface NoteFormProps {
   onClose: () => void;
 }
+
+const NoteSchema = Yup.object().shape({
+  title: Yup.string()
+    .min(3, "Too Short!")
+    .max(50, "Too Long!")
+    .required("Required"),
+  content: Yup.string().max(500, "Too Long!"),
+  tag: Yup.string()
+    .oneOf(["Todo", "Work", "Personal", "Meeting", "Shopping"])
+    .required("Required"),
+});
+
+interface FormValues {
+  title: string;
+  content: string;
+  tag: string;
+}
+
+const initialValues: FormValues = {
+  title: "",
+  content: "",
+  tag: "Todo",
+};
 
 export default function NoteForm({ onClose }: NoteFormProps) {
   const queryClient = useQueryClient();
@@ -19,23 +41,17 @@ export default function NoteForm({ onClose }: NoteFormProps) {
       onClose();
     },
   });
-  const createNewNote = (newNote: CreateNoteParams) => {
+  const createNewNote = (
+    newNote: CreateNoteParams,
+    actions: FormikHelpers<FormValues>
+  ) => {
     createNoteMutation.mutate(newNote);
+    actions.resetForm();
   };
-  const NoteSchema = Yup.object().shape({
-    title: Yup.string()
-      .min(3, "Too Short!")
-      .max(50, "Too Long!")
-      .required("Required"),
-    content: Yup.string().max(500, "Too Long!"),
-    tag: Yup.string()
-      .oneOf(["Todo", "Work", "Personal", "Meeting", "Shopping"])
-      .required("Required"),
-  });
 
   return (
     <Formik
-      initialValues={{ title: "", content: "", tag: "Todo" }}
+      initialValues={initialValues}
       validationSchema={NoteSchema}
       onSubmit={createNewNote}
     >
