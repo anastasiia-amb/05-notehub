@@ -42,9 +42,15 @@ export default function NoteForm({ onClose }: NoteFormProps) {
     },
   });
   const createNewNote = (
-    newNote: CreateNoteParams,
+    values: FormValues,
     actions: FormikHelpers<FormValues>
   ) => {
+    const newNote: CreateNoteParams = {
+      title: values.title,
+      content: values.content,
+      tag: values.tag as CreateNoteParams["tag"],
+    };
+
     createNoteMutation.mutate(newNote);
     actions.resetForm();
   };
