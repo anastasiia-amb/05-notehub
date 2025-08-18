@@ -30,7 +30,6 @@ export default function App() {
     queryKey: ["notes", debouncedQuery, page],
     queryFn: () => fetchNotes(page, debouncedQuery),
     placeholderData: keepPreviousData,
-    enabled: !!debouncedQuery,
   });
 
   const totalPages = data?.totalPages || 0;
